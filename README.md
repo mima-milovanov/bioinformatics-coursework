@@ -1,6 +1,6 @@
 # DNA Sequence Analyzer
 
-This project was developed for the final exam of the [Python for Genomic Data Science](https://www.coursera.org/specializations/genomic-data-science) course, part of the Genomic Data Science Specialization on Coursera.
+This project was developed for the final exam of the Python for Genomic Data Science course, part of the [Genomic Data Science Specialization](https://www.coursera.org/specializations/genomic-data-science) on Coursera.
 
 ## Overview
 

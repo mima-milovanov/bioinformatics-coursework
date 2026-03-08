@@ -22,19 +22,19 @@ def parse_fasta(filename):
 
     with open(filename) as f:
         for line in f:
-            line = line.strip()  # uklanja whitespace i razmake
-            if not line:  # ako je prazna linija preskoci tu iteraciju
+            line = line.strip()
+            if not line:
                 continue
-            if line.startswith(">"):  # provera da li je to header, ako jeste onda je to nova seq
-                if current_id:  # ako smo vec imali prethodnu seq, moramo da je sacuvamo
+            if line.startswith(">"):
+                if current_id:
                     sequences.append((current_id, "".join(seq_parts)))
-                current_id = line[1:].split()[0]  # od hedera >seq1 description here skida > pa deli string po razmacima ['seq1', 'description', 'here'] i uzima index 0
-                seq_parts = []  # resetovanje liste seq, pravimo novu listu za sledecu seq
+                current_id = line[1:].split()[0]
+                seq_parts = []
             else:
-                seq_parts.append(line.upper())  # upper() osigurava da su svi nukleotidi: ATGC a ne atgc
+                seq_parts.append(line.upper())
 
         if current_id:
-            sequences.append((current_id, "".join(seq_parts)))  # da se sacuva poslednja seq
+            sequences.append((current_id, "".join(seq_parts)))
 
     return sequences
 
@@ -46,7 +46,7 @@ def count_records(sequences):
 
 def sequence_lengths(sequences):
     """"Computes seq lengths (longest/shortest/their IDs)"""
-    lengths = {seq_id: len(seq) for seq_id, seq in sequences}  # dictionary comprehension
+    lengths = {seq_id: len(seq) for seq_id, seq in sequences}
 
     max_len = max(lengths.values())
     min_len = min(lengths.values())
@@ -65,18 +65,18 @@ def find_orfs(sequence, frame):
     """Returns list of open reading frame - ORFs:
     (start_position, length, sequence)"""
     orfs = []
-    i = frame - 1  # Pošto Python koristi indeksiranje od 0, a biološki okviri se broje od 1
+    i = frame - 1
 
     while i + 3 <= len(sequence):
         codon = sequence[i:i + 3]
         if codon == START_CODON:
-            j = i + 3  # krece NAKON start kodona
+            j = i + 3
             while j + 3 <= len(sequence):
                 stop = sequence[j:j + 3]
                 if stop in STOP_CODONS:
                     orf_seq = sequence[i:j + 3]
-                    orf_len = j + 3 - i  # include stop codon
-                    orfs.append((i + 1, orf_len, orf_seq))  # 1-based start
+                    orf_len = j + 3 - i
+                    orfs.append((i + 1, orf_len, orf_seq))
                     break
                 j += 3
         i += 3
@@ -105,15 +105,15 @@ def longest_orf_in_sequence(sequence, frame):
     orfs = find_orfs(sequence, frame)
     if not orfs:
         return None
-    return max(orfs, key=lambda x: x[1])  # vrati najveci element iz liste orfs po duzini (x[1])
+    return max(orfs, key=lambda x: x[1])
 
 
 def find_repeats(sequences, n):
     """Counts occurrences of all substrings of length n across all sequences"""
-    counts = Counter()  # Counter je specijalni recnik koji automatski broji pojavljivanja
+    counts = Counter()
 
-    for _, seq in sequences:  # raspakuje tuple (seq_id, seq)
-        for i in range(len(seq) - n + 1):  # prolazi kroz sve moguce pozicije
+    for _, seq in sequences:
+        for i in range(len(seq) - n + 1):
             repeat = seq[i:i + n]
             counts[repeat] += 1
 
@@ -123,7 +123,7 @@ def find_repeats(sequences, n):
 def most_frequent_repeat(sequences, n):
     """Finds the most frequently occurring substring of length n across all sequences"""
     counts = find_repeats(sequences, n)
-    repeats_only = {k: v for k, v in counts.items() if v > 1}  # samo oni koji se pojavljuju vise od jednom
+    repeats_only = {k: v for k, v in counts.items() if v > 1}
     if not repeats_only:
         return None
     repeat = max(repeats_only, key=repeats_only.get)
@@ -136,8 +136,8 @@ def main():
         return
 
     fasta_file = sys.argv[1]
-    frame = int(sys.argv[2]) if len(sys.argv) > 2 else 1  # default frame = 1
-    n = int(sys.argv[3]) if len(sys.argv) > 3 else 6      # default n = 6
+    frame = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+    n = int(sys.argv[3]) if len(sys.argv) > 3 else 6
     target_id = sys.argv[4] if len(sys.argv) > 4 else None
 
     sequences = parse_fasta(fasta_file)
@@ -191,7 +191,7 @@ def main():
     else:
         print(f"\nNo repeats of length {n} found.")
 
-    # Koliko razlicitih sekvenci se pojavljuje Max puta
+    # Count how many distinct sequences occur the maximum number of times
     counts = find_repeats(sequences, n)
     repeats_only = {k: v for k, v in counts.items() if v > 1}
     max_freq = max(repeats_only.values())
